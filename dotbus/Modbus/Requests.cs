@@ -22,7 +22,7 @@ public static class Requests
         return RequestLength;
     }
 
-    public static void DeserializeReadBits(Span<bool> destination, ReadOnlySpan<byte> source)
+    public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
         // source[0] is the function code
         var coilCount = source[1];
