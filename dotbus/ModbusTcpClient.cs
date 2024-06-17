@@ -124,7 +124,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             nameof(amount)
         );
         
-        var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        using var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
         var (readOffset, length) = await DoRequestAsync(
             buffer, 
             functionCode, 
@@ -156,7 +156,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             nameof(amount)
         );
         
-        var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        using var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
         var (readOffset, length) = await DoRequestAsync(
             buffer, 
             functionCode, 
