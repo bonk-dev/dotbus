@@ -11,12 +11,13 @@ public static class Requests
     
     public static int Serialize(
         Span<byte> destination, 
+        EFunctionCode functionCode,
         ushort startAddress, 
-        ushort amount)
+        ushort amountOrValue)
     {
-        destination[0] = (byte)EFunctionCode.ReadCoils;
+        destination[0] = (byte)functionCode;
         BinaryPrimitives.WriteUInt16BigEndian(destination[1..], startAddress);
-        BinaryPrimitives.WriteUInt16BigEndian(destination[3..], amount);
+        BinaryPrimitives.WriteUInt16BigEndian(destination[3..], amountOrValue);
 
         return RequestLength;
     }

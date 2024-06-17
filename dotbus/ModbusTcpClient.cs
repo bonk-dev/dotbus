@@ -35,6 +35,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         );
         written += Requests.Serialize(
             owner.Span[written..],
+            EFunctionCode.ReadCoils,
             (ushort)startingAddress,
             (ushort)amount
         );
