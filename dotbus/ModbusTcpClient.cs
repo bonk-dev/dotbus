@@ -23,6 +23,14 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
     public async Task ReadCoilsAsync(
         Memory<bool> destination,
         int startingAddress,
+        int amount,
+        CancellationToken cancellationToken = default
+    ) => await ReadBitsAsync(destination, EFunctionCode.ReadCoils, startingAddress, amount, cancellationToken);
+
+    private async Task ReadBitsAsync(
+        Memory<bool> destination,
+        EFunctionCode functionCode,
+        int startingAddress,
         int amount, 
         CancellationToken cancellationToken = default)
     {
@@ -35,7 +43,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         );
         written += Requests.Serialize(
             owner.Span[written..],
-            EFunctionCode.ReadCoils,
+            functionCode,
             (ushort)startingAddress,
             (ushort)amount
         );
