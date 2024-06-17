@@ -61,8 +61,6 @@ public static class Requests
 
     public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
-        ThrowIfException(source);
-        
         // source[0] is the function code
         var coilCount = source[1];
         BitUtils.ExpandBits(destination, source[2..], coilCount);
@@ -70,8 +68,6 @@ public static class Requests
 
     public static void DeserializeWords(Span<ushort> destination, ReadOnlySpan<byte> source)
     {
-        ThrowIfException(source);
-     
         // source[0] is the function code   
         var wordCount = source[1] / 2;
 
@@ -84,20 +80,20 @@ public static class Requests
             destination[i] = BinaryPrimitives.ReadUInt16BigEndian(source[(dataOffset + i * 2)..]);
         }
     }
-
-    /// <summary>
-    /// Checks if the response is an exception message
-    /// </summary>
-    /// <param name="functionCodeByte">The returned function code</param>
-    /// <returns>True if the MSB is set to high</returns>
-    public static bool IsException(byte functionCodeByte) => 
-        (functionCodeByte & 0b1000_0000) != 0;
-
-    private static void ThrowIfException(ReadOnlySpan<byte> source)
+    
+    public static void ThrowIfException(ReadOnlySpan<byte> source)
     {
         if (IsException(source[0]))
         {
             throw new ModbusException((EExceptionCode)source[1]);
         }
     }
+
+    /// <summary>
+    /// Checks if the response is an exception message
+    /// </summary>
+    /// <param name="functionCodeByte">The returned function code</param>
+    /// <returns>True if the MSB is set to high</returns>
+    private static bool IsException(byte functionCodeByte) => 
+        (functionCodeByte & 0b1000_0000) != 0;
 }

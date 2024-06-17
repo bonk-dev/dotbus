@@ -63,4 +63,14 @@ catch (ModbusException ex)
     Console.WriteLine("ModbusException handled: " + ex.Message);
 }
 
+try
+{
+    // This should also throw an exception
+    await mClient.WriteMultipleRegistersAsync(1000, new ushort[1]);
+}
+catch (ModbusException ex)
+{
+    Console.WriteLine("ModbusException on write handled: " + ex.Message);
+}
+
 Console.WriteLine("Done");

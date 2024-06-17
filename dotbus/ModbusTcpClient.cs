@@ -263,6 +263,8 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
                 sentTransactionId, 
                 receivedTransactionId);
         }
+        
+        Requests.ThrowIfException(destination.Span[readOffset..]);
 
         return (readOffset, length);
     }
