@@ -7,6 +7,8 @@ namespace dotbus;
 
 public class ModbusTcpClient : IDisposable, IAsyncDisposable
 {
+    private const int PacketBufferSize = 260;
+    
     private readonly Stream _stream;
     private readonly byte _unitId;
 
@@ -24,7 +26,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount, 
         CancellationToken cancellationToken = default)
     {
-        using var owner = MemoryOwner<byte>.Allocate(260);
+        using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
         var memBuffer = owner.Memory;
 
         var (written, sentTransactionId) = WriteHeader(
