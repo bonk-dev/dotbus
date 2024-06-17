@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using dotbus.Exceptions;
 using dotbus.Utils;
 
 namespace dotbus.Modbus;
@@ -60,6 +61,8 @@ public static class Requests
 
     public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
+        ThrowIfException(source);
+        
         // source[0] is the function code
         var coilCount = source[1];
         BitUtils.ExpandBits(destination, source[2..], coilCount);
@@ -67,7 +70,9 @@ public static class Requests
 
     public static void DeserializeWords(Span<ushort> destination, ReadOnlySpan<byte> source)
     {
-        // source[0] is the function code
+        ThrowIfException(source);
+     
+        // source[0] is the function code   
         var wordCount = source[1] / 2;
 
         // function code (1 byte) + wordCount (1 byte)
@@ -77,6 +82,22 @@ public static class Requests
         for (var i = 0; i < wordCount; ++i)
         {
             destination[i] = BinaryPrimitives.ReadUInt16BigEndian(source[(dataOffset + i * 2)..]);
+        }
+    }
+
+    /// <summary>
+    /// Checks if the response is an exception message
+    /// </summary>
+    /// <param name="functionCodeByte">The returned function code</param>
+    /// <returns>True if the MSB is set to high</returns>
+    public static bool IsException(byte functionCodeByte) => 
+        (functionCodeByte & 0b1000_0000) != 0;
+
+    private static void ThrowIfException(ReadOnlySpan<byte> source)
+    {
+        if (IsException(source[0]))
+        {
+            throw new ModbusException((EExceptionCode)source[1]);
         }
     }
 }

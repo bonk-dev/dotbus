@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using dotbus;
+using dotbus.Exceptions;
 using dotbus.Modbus;
 
 var client = new TcpClient()
@@ -51,5 +52,15 @@ await mClient.WriteMultipleRegistersAsync(300,
     new ushort[] { 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD }
 );
 await mClient.ReadHoldingRegistersAsync(holdingRegs, 300, 7);
+
+try
+{
+    // This should throw an exception
+    await mClient.ReadHoldingRegistersAsync(holdingRegs, 0, 300);
+}
+catch (ModbusException ex)
+{
+    Console.WriteLine("ModbusException handled: " + ex.Message);
+}
 
 Console.WriteLine("Done");
