@@ -31,11 +31,13 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
 
         var (written, sentTransactionId) = WriteHeader(
             owner.Span,
-            ReadCoilsRequest.RequestLength);
+            ReadCoilsRequest.RequestLength
+        );
         written += ReadCoilsRequest.Serialize(
             owner.Span[written..],
             (ushort)startingAddress,
-            (ushort)amount);
+            (ushort)amount
+        );
 
         await _stream.WriteAsync(memBuffer[..written], cancellationToken);
         await _stream.FlushAsync(cancellationToken);
@@ -63,7 +65,8 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             destination,
             id,
             requestLength,
-            _unitId), id);
+            _unitId), id
+        );
     }
 
     public void Dispose() => 
