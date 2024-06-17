@@ -52,6 +52,13 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         );
     }
 
+    public async Task WriteMultipleCoilsAsync(
+        int startingAddress,
+        ReadOnlyMemory<bool> values)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task ReadCoilsAsync(
         Memory<bool> destination,
         int startingAddress,
@@ -141,17 +148,30 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         CancellationToken cancellationToken = default)
     {
         var memBuffer = destination.Memory;
-        
-        var (written, sentTransactionId) = WriteHeader(
+        var written = Requests.Serialize(
             destination.Span,
-            Requests.RequestLength
-        );
-        written += Requests.Serialize(
-            destination.Span[written..],
             functionCode,
             (ushort)startingAddress,
             (ushort)amountOrValue
         );
+
+        return await DoRequestRawDataAsync(destination, memBuffer[..written], cancellationToken);
+    }
+    
+    private async Task<(int readOffset, int length)> DoRequestRawDataAsync(
+        MemoryOwner<byte> destination,
+        ReadOnlyMemory<byte> requestData,
+        CancellationToken cancellationToken = default)
+    {
+        var memBuffer = destination.Memory;
+        requestData.CopyTo(memBuffer[ModbusTcpHeader.ModbusTcpHeaderLength..]);
+        
+        var (written, sentTransactionId) = WriteHeader(
+            destination.Span,
+            requestData.Length
+        );
+
+        written += requestData.Length;
 
         await _stream.WriteAsync(memBuffer[..written], cancellationToken);
         await _stream.FlushAsync(cancellationToken);
