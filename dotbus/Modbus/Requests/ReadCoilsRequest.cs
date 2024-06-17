@@ -25,6 +25,6 @@ public static class ReadCoilsRequest
     {
         // source[0] is the function code
         var coilCount = source[1];
-        BitUtils.ExpandBits(destination, source, coilCount);
+        BitUtils.ExpandBits(destination, source[2..], coilCount);
     }
 }

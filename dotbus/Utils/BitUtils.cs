@@ -20,7 +20,7 @@ public static class BitUtils
 
         for (var i = 0; i < coilCount; ++i)
         {
-            var bitIndex = 8 - i % 8;
+            var bitIndex = i % 8;
             var byteIndex = i / 8;
             
             destination[i] = (source[byteIndex] & (0b1 << bitIndex)) != 0;
