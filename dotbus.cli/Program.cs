@@ -12,10 +12,11 @@ await client.ConnectAsync(args[0], 502);
 var stream = client.GetStream();
 
 await using var mClient = new ModbusTcpClient(stream, 0x01);
+var coils = new Memory<bool>(new bool[2000]);
+
 for (var i = 0; i < 10000; ++i)
 {
-    await mClient.ReadCoilsAsync(0, ReadCoilsRequest.MaxCoilAmount);
-    // mClient.ReadCoils(0, ReadCoilsRequest.MaxCoilAmount); 
+    await mClient.ReadCoilsAsync(coils, 0, ReadCoilsRequest.MaxCoilAmount);
 }
 
 Debugger.Break();

@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Net.Sockets;
 using CommunityToolkit.HighPerformance.Buffers;
 using dotbus.Modbus.Requests;
@@ -19,10 +20,14 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         _unitId = unitId;
     }
 
-    public async Task ReadCoilsAsync(int startingAddress, int amount, CancellationToken cancellationToken = default)
+    public async Task ReadCoilsAsync(
+        Memory<bool> destination,
+        int startingAddress,
+        int amount, 
+        CancellationToken cancellationToken = default)
     {
         using var owner = MemoryOwner<byte>.Allocate(260);
-        var buffer = owner.Memory;
+        var memBuffer = owner.Memory;
 
         var written = WriteHeader(
             owner.Span,
@@ -32,10 +37,18 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             (ushort)startingAddress,
             (ushort)amount);
 
-        await _stream.WriteAsync(buffer[..written], cancellationToken);
+        await _stream.WriteAsync(memBuffer[..written], cancellationToken);
         await _stream.FlushAsync(cancellationToken);
 
-        var read = await _stream.ReadAsync(buffer, cancellationToken);
+        var readBytes = await _stream.ReadAsync(memBuffer, cancellationToken);
+        
+        // TODO: Verify transaction id
+        var (readOffset, transactionId, length) = ModbusTcpHeader.ReadModbusTcpHeader(
+            owner.Span[..readBytes]);
+
+        ReadCoilsRequest.Deserialize(
+            destination.Span,
+            owner.Span.Slice(readOffset, length));
     }
 
     public void ReadCoils(int startingAddress, int amount)

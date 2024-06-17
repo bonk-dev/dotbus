@@ -39,4 +39,13 @@ public class ModbusTcpHeader
 
         return ModbusTcpHeaderLength;
     }
+
+    public static (int readBytes, ushort transactionId, int length) ReadModbusTcpHeader(
+        ReadOnlySpan<byte> source)
+    {
+        var id = BinaryPrimitives.ReadUInt16BigEndian(source);
+        var length = BinaryPrimitives.ReadUInt16BigEndian(source[4..]) - 1;
+
+        return (ModbusTcpHeaderLength, id, length);
+    }
 }

@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using dotbus.Utils;
 
 namespace dotbus.Modbus.Requests;
 
@@ -18,5 +19,12 @@ public static class ReadCoilsRequest
         BinaryPrimitives.WriteUInt16BigEndian(destination[3..], amount);
 
         return RequestLength;
+    }
+
+    public static void Deserialize(Span<bool> destination, ReadOnlySpan<byte> source)
+    {
+        // source[0] is the function code
+        var coilCount = source[1];
+        BitUtils.ExpandBits(destination, source, coilCount);
     }
 }
