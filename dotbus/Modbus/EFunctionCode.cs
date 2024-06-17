@@ -9,6 +9,7 @@ public enum EFunctionCode : byte
     
     WriteSingleCoil = 0x05,
     WriteSingleRegister = 0x06,
+    WriteMultipleCoils = 0x0F,
     WriteMultipleRegisters = 0x10,
     
     ReadExceptionStatus = 0x07

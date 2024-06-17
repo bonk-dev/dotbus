@@ -54,9 +54,15 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
 
     public async Task WriteMultipleCoilsAsync(
         int startingAddress,
-        ReadOnlyMemory<bool> values)
+        ReadOnlyMemory<bool> values,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await DoMultiRequestDiscardAsync(
+            EFunctionCode.WriteMultipleCoils, 
+            startingAddress, 
+            values, 
+            cancellationToken
+        );
     }
 
     public async Task ReadCoilsAsync(
@@ -139,6 +145,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
         _ = await DoRequestAsync(owner, functionCode, startingAddress, amountOrValue, cancellationToken);
     }
+    
+    private async Task DoMultiRequestDiscardAsync(
+        EFunctionCode functionCode,
+        int startingAddress,
+        ReadOnlyMemory<bool> bits,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: This should handle exceptions
+        using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        _ = await DoMultiRequestAsync(owner, functionCode, startingAddress, bits, cancellationToken);
+    }
 
     private async Task<(int readOffset, int length)> DoRequestAsync(
         MemoryOwner<byte> destination,
@@ -153,6 +170,24 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             functionCode,
             (ushort)startingAddress,
             (ushort)amountOrValue
+        );
+
+        return await DoRequestRawDataAsync(destination, memBuffer[..written], cancellationToken);
+    }
+    
+    private async Task<(int readOffset, int length)> DoMultiRequestAsync(
+        MemoryOwner<byte> destination,
+        EFunctionCode functionCode,
+        int startingAddress,
+        ReadOnlyMemory<bool> bits, 
+        CancellationToken cancellationToken = default)
+    {
+        var memBuffer = destination.Memory;
+        var written = Requests.Serialize(
+            destination.Span,
+            functionCode,
+            (ushort)startingAddress,
+            bits.Span
         );
 
         return await DoRequestRawDataAsync(destination, memBuffer[..written], cancellationToken);

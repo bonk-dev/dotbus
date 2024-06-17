@@ -40,4 +40,10 @@ await mClient.ReadHoldingRegistersAsync(holdingRegs, 200, 1);
 await mClient.WriteSingleRegisterAsync(200, 0xDEAD);
 await mClient.ReadHoldingRegistersAsync(holdingRegs, 200, 1);
 
+await mClient.ReadCoilsAsync(coils, 300, 9);
+await mClient.WriteMultipleCoilsAsync(300, 
+    new bool[] { true, false, true, false, true, false, true, false, true }
+);
+await mClient.ReadCoilsAsync(coils, 300, 9);
+
 Console.WriteLine("Done");

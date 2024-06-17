@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace dotbus.Utils;
 
 public static class BitUtils
@@ -24,6 +26,25 @@ public static class BitUtils
             var byteIndex = i / 8;
             
             destination[i] = (source[byteIndex] & (0b1 << bitIndex)) != 0;
+        }
+    }
+
+    public static void SmashBits(Span<byte> destination, ReadOnlySpan<bool> source)
+    {
+        for (var i = 0; i < source.Length; ++i)
+        {
+            var bitIndex = i % 8;
+            var byteIndex = i / 8;
+            var bit = source[i];
+
+            if (!bit)
+            {
+                destination[byteIndex] &= (byte)~(0b1 << bitIndex);
+            }
+            else
+            {
+                destination[byteIndex] |= (byte)(0b1 << bitIndex);
+            }
         }
     }
 }

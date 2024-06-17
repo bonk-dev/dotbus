@@ -22,6 +22,23 @@ public static class Requests
         return RequestLength;
     }
 
+    public static int Serialize(
+        Span<byte> destination,
+        EFunctionCode functionCode,
+        ushort startAddress,
+        ReadOnlySpan<bool> bitValues)
+    {
+        destination[0] = (byte)functionCode;
+        BinaryPrimitives.WriteUInt16BigEndian(destination[1..], startAddress);
+        BinaryPrimitives.WriteUInt16BigEndian(destination[3..], (ushort)bitValues.Length);
+
+        var byteCount = bitValues.Length % 8 == 0 ? bitValues.Length / 8 : bitValues.Length / 8 + 1;
+        destination[5] = (byte)(byteCount);
+        BitUtils.SmashBits(destination[6..], bitValues);
+
+        return 6 + byteCount;
+    }
+
     public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
         // source[0] is the function code
