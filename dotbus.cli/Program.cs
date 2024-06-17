@@ -62,6 +62,10 @@ catch (ModbusException ex)
 {
     Console.WriteLine("ModbusException handled: " + ex.Message);
 }
+catch (ArgumentOutOfRangeException ex)
+{
+    Console.WriteLine("AOR Exception on write handled: " + ex.Message);
+}
 
 try
 {

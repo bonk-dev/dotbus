@@ -84,7 +84,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount,
         CancellationToken cancellationToken = default
     ) => await ReadBitsAsync(destination, EFunctionCode.ReadCoils, startingAddress, amount, cancellationToken);
-    
+
     public async Task ReadDiscreteInputsAsync(
         Memory<bool> destination,
         int startingAddress,
@@ -113,6 +113,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            amount, 
+            Constraints.MinimumReadCoilQuantity, 
+            nameof(amount)
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            amount, 
+            Constraints.MaximumReadCoilQuantity, 
+            nameof(amount)
+        );
+        
         var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
         var (readOffset, length) = await DoRequestAsync(
             buffer, 
@@ -134,6 +145,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            amount, 
+            Constraints.MinimumReadRegisterQuantity, 
+            nameof(amount)
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            amount, 
+            Constraints.MaximumReadRegisterQuantity, 
+            nameof(amount)
+        );
+        
         var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
         var (readOffset, length) = await DoRequestAsync(
             buffer, 
@@ -154,7 +176,6 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amountOrValue,
         CancellationToken cancellationToken = default)
     {
-        // TODO: This should handle exceptions
         using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
         _ = await DoRequestAsync(owner, functionCode, startingAddress, amountOrValue, cancellationToken);
     }
@@ -165,7 +186,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         ReadOnlyMemory<bool> bits,
         CancellationToken cancellationToken = default)
     {
-        // TODO: This should handle exceptions
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            bits.Length, 
+            Constraints.MinimumWriteCoilQuantity, 
+            nameof(bits) + ".Length"
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            bits.Length, 
+            Constraints.MaximumWriteCoilQuantity, 
+            nameof(bits) + ".Length"
+        );
+        
         using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
         _ = await DoMultiRequestAsync(owner, functionCode, startingAddress, bits, cancellationToken);
     }
@@ -176,7 +207,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         ReadOnlyMemory<ushort> words,
         CancellationToken cancellationToken = default)
     {
-        // TODO: This should handle exceptions
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            words.Length, 
+            Constraints.MinimumWriteRegisterQuantity, 
+            nameof(words) + ".Length"
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            words.Length, 
+            Constraints.MaximumWriteRegisterQuantity, 
+            nameof(words) + ".Length"
+        );
+        
         using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
         _ = await DoMultiRequestAsync(owner, functionCode, startingAddress, words, cancellationToken);
     }
@@ -206,6 +247,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         ReadOnlyMemory<bool> bits, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            startingAddress, 
+            Constraints.MinimumAddress,
+            nameof(startingAddress)
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            startingAddress,
+            Constraints.MaximumAddress,
+            nameof(startingAddress)
+        );
+        
         var memBuffer = destination.Memory;
         var written = Requests.Serialize(
             destination.Span,
@@ -224,6 +276,17 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         ReadOnlyMemory<ushort> words, 
         CancellationToken cancellationToken = default)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            startingAddress, 
+            Constraints.MinimumAddress,
+            nameof(startingAddress)
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            startingAddress,
+            Constraints.MaximumAddress,
+            nameof(startingAddress)
+        );
+        
         var memBuffer = destination.Memory;
         var written = Requests.Serialize(
             destination.Span,
