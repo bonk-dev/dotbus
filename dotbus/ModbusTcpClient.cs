@@ -38,6 +38,19 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             cancellationToken
         );
     }
+    
+    public async Task WriteSingleRegisterAsync(
+        int address, 
+        int value, 
+        CancellationToken cancellationToken = default)
+    {
+        await DoRequestDiscardAsync(
+            EFunctionCode.WriteSingleRegister,
+            address, 
+            value, 
+            cancellationToken
+        );
+    }
 
     public async Task ReadCoilsAsync(
         Memory<bool> destination,
