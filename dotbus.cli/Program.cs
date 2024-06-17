@@ -46,4 +46,10 @@ await mClient.WriteMultipleCoilsAsync(300,
 );
 await mClient.ReadCoilsAsync(coils, 300, 9);
 
+await mClient.ReadHoldingRegistersAsync(holdingRegs, 300, 7);
+await mClient.WriteMultipleRegistersAsync(300, 
+    new ushort[] { 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD, 0xDEAD }
+);
+await mClient.ReadHoldingRegistersAsync(holdingRegs, 300, 7);
+
 Console.WriteLine("Done");

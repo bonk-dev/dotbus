@@ -38,6 +38,25 @@ public static class Requests
 
         return 6 + byteCount;
     }
+    
+    public static int Serialize(
+        Span<byte> destination,
+        EFunctionCode functionCode,
+        ushort startAddress,
+        ReadOnlySpan<ushort> words)
+    {
+        destination[0] = (byte)functionCode;
+        BinaryPrimitives.WriteUInt16BigEndian(destination[1..], startAddress);
+        BinaryPrimitives.WriteUInt16BigEndian(destination[3..], (ushort)words.Length);
+        destination[5] = (byte)(words.Length * 2);
+
+        for (var i = 0; i < words.Length; ++i)
+        {
+            BinaryPrimitives.WriteUInt16BigEndian(destination[(6 + i * 2)..], words[i]);
+        }
+
+        return 6 + words.Length * 2;
+    }
 
     public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
