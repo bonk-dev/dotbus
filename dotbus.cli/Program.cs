@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using dotbus;
 using dotbus.Modbus.Requests;
 
@@ -18,7 +17,5 @@ for (var i = 0; i < 10000; ++i)
 {
     await mClient.ReadCoilsAsync(coils, 0, ReadCoilsRequest.MaxCoilAmount);
 }
-
-Debugger.Break();
 
 Console.WriteLine("Done");
