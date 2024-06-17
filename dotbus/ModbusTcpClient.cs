@@ -1,4 +1,5 @@
 using CommunityToolkit.HighPerformance.Buffers;
+using dotbus.Exceptions;
 using dotbus.Modbus.Requests;
 using dotbus.Transport;
 
@@ -26,7 +27,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         using var owner = MemoryOwner<byte>.Allocate(260);
         var memBuffer = owner.Memory;
 
-        var written = WriteHeader(
+        var (written, sentTransactionId) = WriteHeader(
             owner.Span,
             ReadCoilsRequest.RequestLength);
         written += ReadCoilsRequest.Serialize(
@@ -38,22 +39,30 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         await _stream.FlushAsync(cancellationToken);
 
         var readBytes = await _stream.ReadAsync(memBuffer, cancellationToken);
-        
-        // TODO: Verify transaction id
-        var (readOffset, transactionId, length) = ModbusTcpHeader.ReadModbusTcpHeader(
+        var (readOffset, receivedTransactionId, length) = ModbusTcpHeader.ReadModbusTcpHeader(
             owner.Span[..readBytes]);
+
+        if (sentTransactionId != receivedTransactionId)
+        {
+            throw new TransactionIdMismatchException(
+                sentTransactionId, 
+                receivedTransactionId);
+        }
 
         ReadCoilsRequest.Deserialize(
             destination.Span,
             owner.Span.Slice(readOffset, length));
     }
 
-    private int WriteHeader(Span<byte> destination, int requestLength) =>
-        ModbusTcpHeader.WriteModbusTcpHeader(
-            destination, 
-            _nextTransactionId++,
+    private (int writtenBytes, ushort transactionId) WriteHeader(Span<byte> destination, int requestLength)
+    {
+        var id = _nextTransactionId++;
+        return (ModbusTcpHeader.WriteModbusTcpHeader(
+            destination,
+            id,
             requestLength,
-            _unitId);
+            _unitId), id);
+    }
 
     public void Dispose() => 
         _stream.Dispose();
