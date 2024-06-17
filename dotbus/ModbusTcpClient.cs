@@ -40,6 +40,13 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount,
         CancellationToken cancellationToken = default
     ) => await ReadWordsAsync(destination, EFunctionCode.ReadHoldingRegisters, startingAddress, amount, cancellationToken);
+    
+    public async Task ReadInputRegistersAsync(
+        Memory<ushort> destination,
+        int startingAddress,
+        int amount,
+        CancellationToken cancellationToken = default
+    ) => await ReadWordsAsync(destination, EFunctionCode.ReadInputRegisters, startingAddress, amount, cancellationToken);
 
     private async Task ReadBitsAsync(
         Memory<bool> destination,
