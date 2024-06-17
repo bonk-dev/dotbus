@@ -1,3 +1,4 @@
+// ReSharper disable UnusedMember.Global
 namespace dotbus.Modbus;
 
 public enum EExceptionCode : byte
