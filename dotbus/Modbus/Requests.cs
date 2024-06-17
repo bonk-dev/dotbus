@@ -81,6 +81,19 @@ public static class Requests
         }
     }
     
+    public static void DeserializeBytes(Span<byte> destination, ReadOnlySpan<byte> source)
+    {
+        // source[0] is the function code   
+        var wordCount = source[1] / 2;
+
+        // function code (1 byte) + wordCount (1 byte)
+        const int dataOffset = 2;
+        
+        source
+            .Slice(dataOffset, wordCount * 2)
+            .CopyTo(destination);
+    }
+    
     public static void ThrowIfException(ReadOnlySpan<byte> source)
     {
         if (IsException(source[0]))

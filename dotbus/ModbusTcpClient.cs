@@ -99,6 +99,13 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         CancellationToken cancellationToken = default
     ) => await ReadWordsAsync(destination, EFunctionCode.ReadHoldingRegisters, startingAddress, amount, cancellationToken);
     
+    public async Task ReadHoldingRegistersAsync(
+        Memory<byte> destination,
+        int startingAddress,
+        int amount,
+        CancellationToken cancellationToken = default
+    ) => await ReadWordsAsync(destination, EFunctionCode.ReadHoldingRegisters, startingAddress, amount, cancellationToken);
+    
     public async Task ReadInputRegistersAsync(
         Memory<ushort> destination,
         int startingAddress,
@@ -168,6 +175,38 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         Requests.DeserializeWords(
             destination.Span,
         buffer.Span.Slice(readOffset, length));
+    }
+    
+    private async Task ReadWordsAsync(
+        Memory<byte> destination,
+        EFunctionCode functionCode,
+        int startingAddress,
+        int amount, 
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(
+            amount, 
+            Constraints.MinimumReadRegisterQuantity, 
+            nameof(amount)
+        );
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            amount, 
+            Constraints.MaximumReadRegisterQuantity, 
+            nameof(amount)
+        );
+        
+        using var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        var (readOffset, length) = await DoRequestAsync(
+            buffer, 
+            functionCode, 
+            startingAddress, 
+            amount, 
+            cancellationToken
+        );
+
+        Requests.DeserializeBytes(
+            destination.Span,
+            buffer.Span.Slice(readOffset, length));
     }
 
     private async Task DoRequestDiscardAsync(
