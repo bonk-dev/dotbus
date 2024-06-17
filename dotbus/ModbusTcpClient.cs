@@ -1,6 +1,3 @@
-using System.Buffers;
-using System.Buffers.Binary;
-using System.Net.Sockets;
 using CommunityToolkit.HighPerformance.Buffers;
 using dotbus.Modbus.Requests;
 using dotbus.Transport;
@@ -49,22 +46,6 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         ReadCoilsRequest.Deserialize(
             destination.Span,
             owner.Span.Slice(readOffset, length));
-    }
-
-    public void ReadCoils(int startingAddress, int amount)
-    {
-        Span<byte> buffer = stackalloc byte[260];
-
-        var written = WriteHeader(
-            buffer,
-            ReadCoilsRequest.RequestLength);
-        written += ReadCoilsRequest.Serialize(
-            buffer[written..],
-            (ushort)startingAddress,
-            (ushort)amount);
-
-        _stream.Write(buffer[..written]);
-        var read = _stream.Read(buffer);
     }
 
     private int WriteHeader(Span<byte> destination, int requestLength) =>
