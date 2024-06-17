@@ -54,7 +54,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
                 receivedTransactionId);
         }
 
-        Requests.DeserializeReadCoils(
+        Requests.DeserializeReadBits(
             destination.Span,
             owner.Span.Slice(readOffset, length));
     }
