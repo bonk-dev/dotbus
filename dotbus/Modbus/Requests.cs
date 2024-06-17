@@ -3,7 +3,7 @@ using dotbus.Utils;
 
 namespace dotbus.Modbus;
 
-public static class ReadCoilsRequest
+public static class Requests
 {
     public const int MinCoilAmount = 1;
     public const int MaxCoilAmount = 2000;
@@ -21,7 +21,7 @@ public static class ReadCoilsRequest
         return RequestLength;
     }
 
-    public static void Deserialize(Span<bool> destination, ReadOnlySpan<byte> source)
+    public static void DeserializeReadCoils(Span<bool> destination, ReadOnlySpan<byte> source)
     {
         // source[0] is the function code
         var coilCount = source[1];

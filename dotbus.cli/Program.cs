@@ -15,7 +15,7 @@ var coils = new Memory<bool>(new bool[2000]);
 
 for (var i = 0; i < 10000; ++i)
 {
-    await mClient.ReadCoilsAsync(coils, 0, ReadCoilsRequest.MaxCoilAmount);
+    await mClient.ReadCoilsAsync(coils, 0, Requests.MaxCoilAmount);
 }
 
 Console.WriteLine("Done");

@@ -31,9 +31,9 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
 
         var (written, sentTransactionId) = WriteHeader(
             owner.Span,
-            ReadCoilsRequest.RequestLength
+            Requests.RequestLength
         );
-        written += ReadCoilsRequest.Serialize(
+        written += Requests.Serialize(
             owner.Span[written..],
             (ushort)startingAddress,
             (ushort)amount
@@ -53,7 +53,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
                 receivedTransactionId);
         }
 
-        ReadCoilsRequest.Deserialize(
+        Requests.DeserializeReadCoils(
             destination.Span,
             owner.Span.Slice(readOffset, length));
     }
