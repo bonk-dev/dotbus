@@ -20,6 +20,25 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         _unitId = unitId;
     }
 
+    public async Task WriteSingleCoilAsync(
+        int address, 
+        bool value, 
+        CancellationToken cancellationToken = default)
+    {
+        const int coilLow = 0x0000;
+        const int coilHigh = 0xFF00;
+        var coilValue = value
+            ? coilHigh
+            : coilLow;
+
+        await DoRequestDiscardAsync(
+            EFunctionCode.WriteSingleCoil,
+            address, 
+            coilValue, 
+            cancellationToken
+        );
+    }
+
     public async Task ReadCoilsAsync(
         Memory<bool> destination,
         int startingAddress,
@@ -90,11 +109,22 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         buffer.Span.Slice(readOffset, length));
     }
 
+    private async Task DoRequestDiscardAsync(
+        EFunctionCode functionCode,
+        int startingAddress,
+        int amountOrValue,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: This should handle exceptions
+        using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        _ = await DoRequestAsync(owner, functionCode, startingAddress, amountOrValue, cancellationToken);
+    }
+
     private async Task<(int readOffset, int length)> DoRequestAsync(
         MemoryOwner<byte> destination,
         EFunctionCode functionCode,
         int startingAddress,
-        int amount, 
+        int amountOrValue, 
         CancellationToken cancellationToken = default)
     {
         var memBuffer = destination.Memory;
@@ -107,7 +137,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
             destination.Span[written..],
             functionCode,
             (ushort)startingAddress,
-            (ushort)amount
+            (ushort)amountOrValue
         );
 
         await _stream.WriteAsync(memBuffer[..written], cancellationToken);

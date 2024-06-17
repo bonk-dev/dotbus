@@ -33,4 +33,7 @@ for (var i = 0; i < 100; ++i)
     await mClient.ReadInputRegistersAsync(inputRegs, 0, 8);
 }
 
+await mClient.WriteSingleCoilAsync(173, true);
+await mClient.ReadCoilsAsync(coils, 173, 1);
+
 Console.WriteLine("Done");
