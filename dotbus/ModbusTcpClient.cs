@@ -1,6 +1,6 @@
 using CommunityToolkit.HighPerformance.Buffers;
 using dotbus.Exceptions;
-using dotbus.Modbus.Requests;
+using dotbus.Modbus;
 using dotbus.Transport;
 
 namespace dotbus;

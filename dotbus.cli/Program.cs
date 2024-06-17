@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 using dotbus;
-using dotbus.Modbus.Requests;
+using dotbus.Modbus;
 
 var client = new TcpClient()
 {

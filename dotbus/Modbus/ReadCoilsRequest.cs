@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using dotbus.Utils;
 
-namespace dotbus.Modbus.Requests;
+namespace dotbus.Modbus;
 
 public static class ReadCoilsRequest
 {
