@@ -33,6 +33,13 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount,
         CancellationToken cancellationToken = default
     ) => await ReadBitsAsync(destination, EFunctionCode.ReadDiscreteInputs, startingAddress, amount, cancellationToken);
+    
+    public async Task ReadHoldingRegistersAsync(
+        Memory<ushort> destination,
+        int startingAddress,
+        int amount,
+        CancellationToken cancellationToken = default
+    ) => await ReadWordsAsync(destination, EFunctionCode.ReadHoldingRegisters, startingAddress, amount, cancellationToken);
 
     private async Task ReadBitsAsync(
         Memory<bool> destination,
@@ -53,6 +60,27 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         Requests.DeserializeBits(
             destination.Span,
             buffer.Span.Slice(readOffset, length));
+    }
+    
+    private async Task ReadWordsAsync(
+        Memory<ushort> destination,
+        EFunctionCode functionCode,
+        int startingAddress,
+        int amount, 
+        CancellationToken cancellationToken = default)
+    {
+        var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        var (readOffset, length) = await DoRequestAsync(
+            buffer, 
+            functionCode, 
+            startingAddress, 
+            amount, 
+            cancellationToken
+        );
+
+        Requests.DeserializeWords(
+            destination.Span,
+        buffer.Span.Slice(readOffset, length));
     }
 
     private async Task<(int readOffset, int length)> DoRequestAsync(

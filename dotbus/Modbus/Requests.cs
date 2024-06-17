@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using dotbus.Utils;
 
 namespace dotbus.Modbus;
@@ -27,5 +28,20 @@ public static class Requests
         // source[0] is the function code
         var coilCount = source[1];
         BitUtils.ExpandBits(destination, source[2..], coilCount);
+    }
+
+    public static void DeserializeWords(Span<ushort> destination, ReadOnlySpan<byte> source)
+    {
+        // source[0] is the function code
+        var wordCount = source[1] / 2;
+
+        // function code (1 byte) + wordCount (1 byte)
+        const int dataOffset = 2;
+        
+        // I'd love to use MemoryMarshal.Cast<TF, TT> but Modbus is serializing in BigEndian :(
+        for (var i = 0; i < wordCount; ++i)
+        {
+            destination[i] = BinaryPrimitives.ReadUInt16BigEndian(source[(dataOffset + i * 2)..]);
+        }
     }
 }
