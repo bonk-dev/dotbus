@@ -41,15 +41,35 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
         int amount, 
         CancellationToken cancellationToken = default)
     {
-        using var owner = MemoryOwner<byte>.Allocate(PacketBufferSize);
-        var memBuffer = owner.Memory;
+        var buffer = MemoryOwner<byte>.Allocate(PacketBufferSize);
+        var (readOffset, length) = await DoRequestAsync(
+            buffer, 
+            functionCode, 
+            startingAddress, 
+            amount, 
+            cancellationToken
+        );
 
+        Requests.DeserializeBits(
+            destination.Span,
+            buffer.Span.Slice(readOffset, length));
+    }
+
+    private async Task<(int readOffset, int length)> DoRequestAsync(
+        MemoryOwner<byte> destination,
+        EFunctionCode functionCode,
+        int startingAddress,
+        int amount, 
+        CancellationToken cancellationToken = default)
+    {
+        var memBuffer = destination.Memory;
+        
         var (written, sentTransactionId) = WriteHeader(
-            owner.Span,
+            destination.Span,
             Requests.RequestLength
         );
         written += Requests.Serialize(
-            owner.Span[written..],
+            destination.Span[written..],
             functionCode,
             (ushort)startingAddress,
             (ushort)amount
@@ -60,7 +80,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
 
         var readBytes = await _stream.ReadAsync(memBuffer, cancellationToken);
         var (readOffset, receivedTransactionId, length) = ModbusTcpHeader.ReadModbusTcpHeader(
-            owner.Span[..readBytes]);
+            destination.Span[..readBytes]);
 
         if (sentTransactionId != receivedTransactionId)
         {
@@ -69,9 +89,7 @@ public class ModbusTcpClient : IDisposable, IAsyncDisposable
                 receivedTransactionId);
         }
 
-        Requests.DeserializeBits(
-            destination.Span,
-            owner.Span.Slice(readOffset, length));
+        return (readOffset, length);
     }
 
     private (int writtenBytes, ushort transactionId) WriteHeader(Span<byte> destination, int requestLength)
