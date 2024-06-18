@@ -62,8 +62,9 @@ public static class Requests
     public static void DeserializeBits(Span<bool> destination, ReadOnlySpan<byte> source)
     {
         // source[0] is the function code
-        var coilCount = source[1];
-        BitUtils.ExpandBits(destination, source[2..], coilCount);
+        var byteCount = source[1];
+        var coilCount = destination.Length;
+        BitUtils.ExpandBits(destination, source.Slice(2, byteCount), coilCount);
     }
 
     public static void DeserializeWords(Span<ushort> destination, ReadOnlySpan<byte> source)
