@@ -10,16 +10,18 @@
         <PackageLicenseUrl>https://github.com/bonk-dev/dotbus/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/bonk-dev/dotbus</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
     </ItemGroup>
-
+    
     <ItemGroup>
-      <Content Include="..\README.md">
-        <Link>README.md</Link>
-      </Content>
+        <None Include="..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
     </ItemGroup>
 
 </Project>
