@@ -7,9 +7,9 @@
         <Title>dotbus</Title>
         <Description>dotbus is a lightweight and efficient Modbus/TCP library for C#. Designed with a focus on minimal memory allocation.</Description>
         <PackageProjectUrl>https://github.com/bonk-dev/dotbus</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/bonk-dev/dotbus/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/bonk-dev/dotbus</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
